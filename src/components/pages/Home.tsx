@@ -128,19 +128,6 @@ export default function HomePage(): ReactElement {
           <SearchBar size="large" />
         </Container>
 
-        <section className={styles.section}>
-          <h3>Bookmarks</h3>
-          <Bookmarks />
-        </section>
-
-        {queryAndDids && (
-          <SectionQueryResult
-            title="Highest Liquidity"
-            query={queryAndDids[0]}
-            queryData={queryAndDids[1]}
-          />
-        )}
-
         <SectionQueryResult
           title="Recently Published"
           query={queryLatest}

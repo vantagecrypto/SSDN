@@ -38,18 +38,10 @@ export default function Seo({
       <meta property="og:description" content={description} />
       <meta property="og:url" content={uri} />
 
-      <meta
-        name="image"
-        content={`${siteUrl}${siteImage.childImageSharp.original.src}`}
-      />
-      <meta
-        property="og:image"
-        content={`${siteUrl}${siteImage.childImageSharp.original.src}`}
-      />
+      <meta name="image" content={`${siteUrl}/preview.png`} />
+      <meta property="og:image" content={`${siteUrl}/preview.png`} />
 
       <meta property="og:site_name" content={siteTitle} />
-      <meta name="twitter:creator" content="@oceanprotocol" />
-      <meta name="twitter:card" content="summary_large_image" />
     </Helmet>
   )
 }

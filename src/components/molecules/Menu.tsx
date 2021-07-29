@@ -33,14 +33,15 @@ function MenuLink({ item }: { item: MenuItem }) {
 
 export default function Menu(): ReactElement {
   const { menu, siteTitle } = useSiteMetadata()
+  const siteTitleNew = 'SSDN'
 
   return (
     <nav className={styles.menu}>
       <Container>
         <Link to="/" className={styles.logoUnit}>
-          <Logo />
+          <Logo noWordmark />
           <h1 className={styles.title}>
-            {siteTitle} <Badge label="beta" />
+            {siteTitleNew} <Badge label="beta" />
           </h1>
         </Link>
 

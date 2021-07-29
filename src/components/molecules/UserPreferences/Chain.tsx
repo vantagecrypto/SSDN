@@ -29,18 +29,6 @@ export default function Chain(): ReactElement {
       text: 'Mainnet'
     },
     {
-      name: 'polygon',
-      checked: isNetworkSelected('polygon'),
-      title: 'Polygon/Matic',
-      text: 'Mainnet'
-    },
-    {
-      name: 'bsc',
-      checked: isNetworkSelected('bsc'),
-      title: 'BSC',
-      text: 'Mainnet'
-    },
-    {
       name: 'moonbeamalpha',
       checked: isNetworkSelected('moonbeamalpha'),
       title: 'Moonbase Alpha',

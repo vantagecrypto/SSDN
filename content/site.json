@@ -1,9 +1,9 @@
 {
   "site": {
-    "siteTitle": "Ocean Market",
-    "siteTagline": "A marketplace to find, publish and trade data sets in the Ocean Network.",
-    "siteUrl": "https://market.oceanprotocol.com",
-    "siteIcon": "node_modules/@oceanprotocol/art/logo/favicon-white.png",
+    "siteTitle": "Vantage SSDN",
+    "siteTagline": "A marketplace for streaming market data and real time market analytics",
+    "siteUrl": "https://market.vantagecrypto.com/",
+    "siteIcon": "src/images/vc/favicon.png",
     "siteImage": "../src/images/share.png",
     "copyright": "All Rights Reserved. Powered by [Ocean Protocol](https://oceanprotocol.com)",
     "menu": [
