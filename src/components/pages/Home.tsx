@@ -127,7 +127,11 @@ export default function HomePage(): ReactElement {
         <Container narrow className={styles.searchWrap}>
           <SearchBar size="large" />
         </Container>
-
+        <div className={styles.homeSearchButtonDiv}>
+          <Button className={styles.homeSearchButton}>VantageCrypto</Button>
+          <Button className={styles.homeSearchButton}>Metrics</Button>
+          <Button className={styles.homeSearchButton}>Signals</Button>
+        </div>
         <SectionQueryResult
           title="Recently Published"
           query={queryLatest}

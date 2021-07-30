@@ -18,9 +18,9 @@ export default function Footer(): ReactElement {
         <MarketStats />
         <div className={styles.copyright}>
           © {year} <Markdown text={copyright} /> —{' '}
-          <Link to="https://faq.vantagecrypto.com/index.php?sid=4515&lang=en&action=faq&cat=1&id=19&artlang=en">
+          <a href="https://faq.vantagecrypto.com/index.php?sid=4515&lang=en&action=faq&cat=1&id=19&artlang=en">
             Terms
-          </Link>
+          </a>
           {' — '}
           <a href="https://faq.vantagecrypto.com/index.php?sid=4513&lang=en&action=faq&cat=1&id=20&artlang=en">
             Privacy
