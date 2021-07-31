@@ -1,0 +1,5 @@
+.tableReportingTable {
+  width: 100%;
+  align-items: flex-start;
+  margin: calc(var(--spacer) / 2) 0;
+}

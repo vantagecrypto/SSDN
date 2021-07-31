@@ -4,6 +4,12 @@
   margin-top: calc(var(--spacer) * var(--line-height));
 }
 
+.tableWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: calc(var(--spacer) * var(--line-height));
+}
+
 .section {
   margin-top: calc(var(--spacer) * 2);
 }
@@ -17,7 +23,7 @@
   margin-top: var(--spacer);
 }
 
-.homeSearchButton {
+.reportingSearchButton {
   overflow: hidden;
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -29,26 +35,26 @@
   padding: calc(var(--spacer) / 6) !important;
 }
 
-.homeSearchButton:hover,
-.homeSearchButton:focus {
+.reportingSearchButton:hover,
+.reportingSearchButton:focus {
   color: var(--font-color-text);
   background: inherit;
   transform: none;
 }
 
-.homeSearchButton.selected {
+.reportingSearchButton.selected {
   color: var(--background-body);
   background: var(--font-color-text);
   border-color: var(--background-body);
 }
 
-.homeSearchButton.selected::after {
+.reportingSearchButton.selected::after {
   content: '✕';
   margin-left: calc(var(--spacer) / 6);
   color: var(--background-body);
 }
 
-.homeSearchButtonDiv {
+.reportingSearchButtonDiv {
   max-width: 42rem;
   margin-left: auto;
   margin-right: auto;
@@ -61,8 +67,45 @@
 }
 
 @media (min-width: 40rem) {
-  .homeSearchButtonDiv {
+  .reportingSearchButtonDiv {
     padding-left: calc(var(--spacer) / 0.33);
     padding-right: calc(var(--spacer) / 0.33);
+  }
+}
+
+.reportingTableHeader {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  margin-right: calc(var(--spacer) / 6);
+  margin-bottom: calc(var(--spacer) / 6);
+  color: var(--brand-white);
+  background: var(--brand-grey-light);
+  font-size: var(--font-size-base);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-bold);
+  /* the only thing not possible to overwrite button style="text" with more specifity of selectors, so sledgehammer */
+  padding: calc(var(--spacer) / 6) !important;
+}
+
+.reportingTableHeaderDiv {
+  margin-left: auto;
+  margin-right: auto;
+  overflow-x: auto;
+  padding-left: calc(var(--spacer) / 3);
+  padding-right: calc(var(--spacer) / 3);
+  display: flex; /* establish flex container */
+  flex-direction: row; /* default value; can be omitted */
+  flex-wrap: nowrap; /* default value; can be omitted */
+  justify-content: space-between;
+}
+
+.reportingPreview {
+  margin-top: var(--spacer);
+  margin-left: 18%;
+}
+
+@media (max-width: 40rem) {
+  .reportingPreview {
+    margin-left: calc(var(--spacer) / 6);
   }
 }
