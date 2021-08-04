@@ -17,6 +17,7 @@ import { getHighestLiquidityDIDs } from '../../utils/subgraph'
 import { DDO, Logger } from '@oceanprotocol/lib'
 
 import { useWeb3 } from '../../providers/Web3'
+import classNames from 'classnames/bind'
 
 const queryLatest = {
   page: 1,
@@ -28,6 +29,8 @@ const queryLatest = {
   },
   sort: { created: -1 }
 }
+
+const cx = classNames.bind(styles)
 
 function sortElements(items: DDO[], sorted: string[]) {
   items.sort(function (a, b) {
@@ -103,7 +106,30 @@ export default function HomePage(): ReactElement {
   const { config, loading } = useOcean()
   const [queryAndDids, setQueryAndDids] = useState<[SearchQuery, string]>()
   const { web3Loading, web3Provider } = useWeb3()
-
+  const [homeSearchButtons, setHomeSearchButtons] = useState<string[]>([])
+  const selectHomeSearchButtonStyleVa = cx({
+    [styles.homeSearchButton]: true,
+    [styles.selected]: homeSearchButtons.includes('va')
+  })
+  const selectHomeSearchButtonStyleMe = cx({
+    [styles.homeSearchButton]: true,
+    [styles.selected]: homeSearchButtons.includes('me')
+  })
+  const selectHomeSearchButtonStyleSi = cx({
+    [styles.homeSearchButton]: true,
+    [styles.selected]: homeSearchButtons.includes('si')
+  })
+  function selectHomeSearchButton(val: string) {
+    if (homeSearchButtons.includes(val)) {
+      setHomeSearchButtons((prev) => [
+        ...prev.filter(function (str) {
+          return !str.includes(val)
+        })
+      ])
+    } else {
+      setHomeSearchButtons((prev) => [...prev, val])
+    }
+  }
   useEffect(() => {
     if (loading || (web3Loading && web3Provider)) return
     getHighestLiquidityDIDs().then((results) => {
@@ -125,12 +151,33 @@ export default function HomePage(): ReactElement {
     <Permission eventType="browse">
       <>
         <Container narrow className={styles.searchWrap}>
-          <SearchBar size="large" />
+          <SearchBar size="large" homeSearchButtonsArr={homeSearchButtons} />
         </Container>
         <div className={styles.homeSearchButtonDiv}>
-          <Button className={styles.homeSearchButton}>VantageCrypto</Button>
-          <Button className={styles.homeSearchButton}>Metrics</Button>
-          <Button className={styles.homeSearchButton}>Signals</Button>
+          <Button
+            className={selectHomeSearchButtonStyleVa}
+            onClick={() => {
+              selectHomeSearchButton('va')
+            }}
+          >
+            VantageCrypto
+          </Button>
+          <Button
+            className={selectHomeSearchButtonStyleMe}
+            onClick={() => {
+              selectHomeSearchButton('me')
+            }}
+          >
+            Metrics
+          </Button>
+          <Button
+            className={selectHomeSearchButtonStyleSi}
+            onClick={() => {
+              selectHomeSearchButton('si')
+            }}
+          >
+            Signals
+          </Button>
         </div>
         <SectionQueryResult
           title="Recently Published"

@@ -9,11 +9,13 @@ import { addExistingParamsToUrl } from '../templates/Search/utils'
 export default function SearchBar({
   placeholder,
   initialValue,
+  homeSearchButtonsArr,
   filters,
   size
 }: {
   placeholder?: string
   initialValue?: string
+  homeSearchButtonsArr?: string[]
   filters?: boolean
   size?: 'small' | 'large'
 }): ReactElement {
@@ -21,7 +23,27 @@ export default function SearchBar({
 
   async function startSearch(e: FormEvent<HTMLButtonElement>) {
     e.preventDefault()
+    let addToSearch = ''
+    const searchWords: { [k: string]: string } = {
+      va: 'VantageCrypto',
+      me: 'Metrics',
+      si: 'trading signals'
+    }
+    if (homeSearchButtonsArr && homeSearchButtonsArr.length > 0) {
+      const words = homeSearchButtonsArr.map(function (st) {
+        return searchWords[st]
+      })
+      addToSearch = words.join(' ')
+    }
     if (value === '') value = ' '
+    if (addToSearch !== '') {
+      if (value === ' ') {
+        value = addToSearch
+      } else {
+        value = value + ' ' + addToSearch
+      }
+    }
+
     const urlEncodedValue = encodeURIComponent(value)
     const url = await addExistingParamsToUrl(location, [
       'text',
