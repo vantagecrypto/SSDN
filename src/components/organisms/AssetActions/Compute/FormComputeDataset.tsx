@@ -6,6 +6,7 @@ import { FormFieldProps } from '../../../../@types/Form'
 import { useStaticQuery, graphql } from 'gatsby'
 import { DDO, BestPrice } from '@oceanprotocol/lib'
 import { AssetSelectionAsset } from '../../../molecules/FormFields/AssetSelection'
+import compareAsBN from '../../../../utils/compareAsBN'
 import ButtonBuy from '../../../atoms/ButtonBuy'
 import PriceOutput from './PriceOutput'
 import { useAsset } from '../../../../providers/Asset'
@@ -51,12 +52,14 @@ export default function FormStartCompute({
   hasPreviousOrder,
   hasDatatoken,
   dtBalance,
+  datasetLowPoolLiquidity,
   assetType,
   assetTimeout,
   hasPreviousOrderSelectedComputeAsset,
   hasDatatokenSelectedComputeAsset,
   dtSymbolSelectedComputeAsset,
   dtBalanceSelectedComputeAsset,
+  selectedComputeAssetLowPoolLiquidity,
   selectedComputeAssetType,
   selectedComputeAssetTimeout,
   stepText,
@@ -72,12 +75,14 @@ export default function FormStartCompute({
   hasPreviousOrder: boolean
   hasDatatoken: boolean
   dtBalance: string
+  datasetLowPoolLiquidity: boolean
   assetType: string
   assetTimeout: string
   hasPreviousOrderSelectedComputeAsset?: boolean
   hasDatatokenSelectedComputeAsset?: boolean
   dtSymbolSelectedComputeAsset?: string
   dtBalanceSelectedComputeAsset?: string
+  selectedComputeAssetLowPoolLiquidity?: boolean
   selectedComputeAssetType?: string
   selectedComputeAssetTimeout?: string
   stepText: string
@@ -90,9 +95,10 @@ export default function FormStartCompute({
 
   const { isValid, values }: FormikContextType<{ algorithm: string }> =
     useFormikContext()
-  const { price, ddo } = useAsset()
+  const { price, ddo, isAssetNetwork } = useAsset()
   const [totalPrice, setTotalPrice] = useState(price?.value)
-  const { accountId } = useWeb3()
+  const [isBalanceSufficient, setIsBalanceSufficient] = useState<boolean>(false)
+  const { accountId, balance } = useWeb3()
   const { ocean } = useOcean()
   const [algorithmConsumableStatus, setAlgorithmConsumableStatus] =
     useState<number>()
@@ -144,6 +150,13 @@ export default function FormStartCompute({
     hasDatatokenSelectedComputeAsset
   ])
 
+  useEffect(() => {
+    if (!totalPrice) return
+    setIsBalanceSufficient(
+      compareAsBN(balance.ocean, `${totalPrice}`) || Number(dtBalance) >= 1
+    )
+  }, [totalPrice])
+
   return (
     <Form className={styles.form}>
       {content.form.data.map((field: FormFieldProps) => (
@@ -171,12 +184,17 @@ export default function FormStartCompute({
       <ButtonBuy
         action="compute"
         disabled={
-          isComputeButtonDisabled || !isValid || algorithmConsumableStatus > 0
+          isComputeButtonDisabled ||
+          !isValid ||
+          !isBalanceSufficient ||
+          !isAssetNetwork ||
+          algorithmConsumableStatus > 0
         }
         hasPreviousOrder={hasPreviousOrder}
         hasDatatoken={hasDatatoken}
         dtSymbol={ddo.dataTokenInfo.symbol}
         dtBalance={dtBalance}
+        datasetLowPoolLiquidity={datasetLowPoolLiquidity}
         assetTimeout={assetTimeout}
         assetType={assetType}
         hasPreviousOrderSelectedComputeAsset={
@@ -185,12 +203,16 @@ export default function FormStartCompute({
         hasDatatokenSelectedComputeAsset={hasDatatokenSelectedComputeAsset}
         dtSymbolSelectedComputeAsset={dtSymbolSelectedComputeAsset}
         dtBalanceSelectedComputeAsset={dtBalanceSelectedComputeAsset}
+        selectedComputeAssetLowPoolLiquidity={
+          selectedComputeAssetLowPoolLiquidity
+        }
         selectedComputeAssetType={selectedComputeAssetType}
         stepText={stepText}
         isLoading={isLoading}
         type="submit"
         priceType={price?.type}
         algorithmPriceType={algorithmPrice?.type}
+        isBalanceSufficient={isBalanceSufficient}
         isConsumable={isConsumable}
         consumableFeedback={consumableFeedback}
         algorithmConsumableStatus={algorithmConsumableStatus}

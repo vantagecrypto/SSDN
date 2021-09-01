@@ -7,8 +7,8 @@ import Styles from '../global/Styles'
 import { useWeb3 } from '../providers/Web3'
 import { useSiteMetadata } from '../hooks/useSiteMetadata'
 import { useAccountPurgatory } from '../hooks/useAccountPurgatory'
+import AnnouncementBanner from './atoms/AnnouncementBanner'
 import styles from './App.module.css'
-import { useGraphSyncStatus } from '../hooks/useGraphSyncStatus'
 
 const contentQuery = graphql`
   query AppQuery {
@@ -39,16 +39,14 @@ export default function App({
   const { warning } = useSiteMetadata()
   const { accountId } = useWeb3()
   const { isInPurgatory, purgatoryData } = useAccountPurgatory(accountId)
-  const { isGraphSynced, blockHead, blockGraph } = useGraphSyncStatus()
 
   return (
     <Styles>
       <div className={styles.app}>
-        <Header />
-
         {(props as PageProps).uri === '/' && (
-          <Alert text={warning.main} state="info" />
+          <AnnouncementBanner text={warning.main} />
         )}
+        <Header />
 
         {isInPurgatory && (
           <Alert

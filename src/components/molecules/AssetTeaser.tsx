@@ -2,12 +2,13 @@ import React from 'react'
 import { Link } from 'gatsby'
 import Dotdotdot from 'react-dotdotdot'
 import Price from '../atoms/Price'
-import styles from './AssetTeaser.module.css'
 import { DDO, BestPrice } from '@oceanprotocol/lib'
 import removeMarkdown from 'remove-markdown'
 import Publisher from '../atoms/Publisher'
-import Time from '../atoms/Time'
 import AssetType from '../atoms/AssetType'
+import NetworkName from '../atoms/NetworkName'
+import { useOcean } from '../../providers/Ocean'
+import styles from './AssetTeaser.module.css'
 
 declare type AssetTeaserProps = {
   ddo: DDO
@@ -45,16 +46,17 @@ const AssetTeaser: React.FC<AssetTeaserProps> = ({
         <div className={styles.content}>
           <Dotdotdot tagName="p" clamp={3}>
             {removeMarkdown(
-              attributes?.additionalInformation?.description || ''
+              attributes?.additionalInformation?.description.substring(
+                0,
+                300
+              ) || ''
             )}
           </Dotdotdot>
         </div>
 
         <footer className={styles.foot}>
           <Price price={price} small />
-          <p className={styles.date}>
-            <Time date={ddo?.created} relative />
-          </p>
+          <NetworkName networkId={ddo.chainId} className={styles.network} />
         </footer>
       </Link>
     </article>

@@ -1,6 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react'
 import SearchBar from '../molecules/SearchBar'
-import styles from './Home.module.css'
 import AssetList from '../organisms/AssetList'
 import {
   QueryResult,
@@ -11,26 +10,54 @@ import { useOcean } from '../../providers/Ocean'
 import Button from '../atoms/Button'
 import Bookmarks from '../molecules/Bookmarks'
 import axios from 'axios'
-import { queryMetadata } from '../../utils/aquarius'
+import {
+  queryMetadata,
+  transformChainIdsListToQuery
+} from '../../utils/aquarius'
 import Permission from '../organisms/Permission'
 import { getHighestLiquidityDIDs } from '../../utils/subgraph'
 import { DDO, Logger } from '@oceanprotocol/lib'
-
-import { useWeb3 } from '../../providers/Web3'
+import { useSiteMetadata } from '../../hooks/useSiteMetadata'
+import { useUserPreferences } from '../../providers/UserPreferences'
+import styles from './Home.module.css'
 import classNames from 'classnames/bind'
 
-const queryLatest = {
-  page: 1,
-  offset: 9,
-  query: {
-    query_string: {
-      query: `-isInPurgatory:true`
+const cx = classNames.bind(styles)
+
+async function getQueryHighest(
+  chainIds: number[]
+): Promise<[SearchQuery, string]> {
+  const [dids, didsLength] = await getHighestLiquidityDIDs(chainIds)
+  const queryHighest = {
+    page: 1,
+    offset: didsLength > 0 ? didsLength : 1,
+    query: {
+      query_string: {
+        query: `${dids && `(${dids}) AND`}(${transformChainIdsListToQuery(
+          chainIds
+        )}) AND -isInPurgatory:true `,
+        fields: ['dataToken']
+      }
     }
-  },
-  sort: { created: -1 }
+  }
+
+  return [queryHighest, dids]
 }
 
-const cx = classNames.bind(styles)
+function getQueryLatest(chainIds: number[]): SearchQuery {
+  return {
+    page: 1,
+    offset: 9,
+    query: {
+      query_string: {
+        query: `(${transformChainIdsListToQuery(
+          chainIds
+        )}) AND -isInPurgatory:true `
+      }
+    },
+    sort: { created: -1 }
+  }
+}
 
 function sortElements(items: DDO[], sorted: string[]) {
   items.sort(function (a, b) {
@@ -50,36 +77,41 @@ function SectionQueryResult({
   action?: ReactElement
   queryData?: string
 }) {
-  const { config } = useOcean()
+  const { appConfig } = useSiteMetadata()
+  const { chainIds } = useUserPreferences()
   const [result, setResult] = useState<QueryResult>()
   const [loading, setLoading] = useState<boolean>()
 
   useEffect(() => {
-    if (!config?.metadataCacheUri) return
+    if (!appConfig.metadataCacheUri) return
     const source = axios.CancelToken.source()
 
     async function init() {
-      try {
-        setLoading(true)
-        const result = await queryMetadata(
-          query,
-          config.metadataCacheUri,
-          source.token
-        )
-        if (queryData && result.totalResults > 0 && result.totalResults <= 15) {
-          const searchDIDs = queryData.split(' ')
-          const sortedAssets = sortElements(result.results, searchDIDs)
-          // We take more assets than we need from the subgraph (to make sure
-          // all the 9 assets with highest liquidity we need are in OceanDB)
-          // so we need to get rid of the surplus
-          const overflow = sortedAssets.length - 9
-          sortedAssets.splice(sortedAssets.length - overflow, overflow)
-          result.results = sortedAssets
+      if (chainIds.length === 0) {
+        const result: QueryResult = {
+          results: [],
+          page: 0,
+          totalPages: 0,
+          totalResults: 0
         }
         setResult(result)
         setLoading(false)
-      } catch (error) {
-        Logger.log(error.message)
+      } else {
+        try {
+          setLoading(true)
+          const result = await queryMetadata(query, source.token)
+          if (queryData && result.totalResults > 0) {
+            const searchDIDs = queryData.split(' ')
+            const sortedAssets = sortElements(result.results, searchDIDs)
+            const overflow = sortedAssets.length - 9
+            sortedAssets.splice(sortedAssets.length - overflow, overflow)
+            result.results = sortedAssets
+          }
+          setResult(result)
+          setLoading(false)
+        } catch (error) {
+          Logger.error(error.message)
+        }
       }
     }
     init()
@@ -87,7 +119,7 @@ function SectionQueryResult({
     return () => {
       source.cancel()
     }
-  }, [query, config?.metadataCacheUri])
+  }, [appConfig.metadataCacheUri, query, queryData])
 
   return (
     <section className={styles.section}>
@@ -103,9 +135,8 @@ function SectionQueryResult({
 }
 
 export default function HomePage(): ReactElement {
-  const { config, loading } = useOcean()
   const [queryAndDids, setQueryAndDids] = useState<[SearchQuery, string]>()
-  const { web3Loading, web3Provider } = useWeb3()
+  const { chainIds } = useUserPreferences()
   const [homeSearchButtons, setHomeSearchButtons] = useState<string[]>([])
   const selectHomeSearchButtonStyleVa = cx({
     [styles.homeSearchButton]: true,
@@ -130,28 +161,17 @@ export default function HomePage(): ReactElement {
       setHomeSearchButtons((prev) => [...prev, val])
     }
   }
-  useEffect(() => {
-    if (loading || (web3Loading && web3Provider)) return
-    getHighestLiquidityDIDs().then((results) => {
-      const queryHighest = {
-        page: 1,
-        offset: 15,
-        query: {
-          query_string: {
-            query: `(${results}) AND -isInPurgatory:true`,
-            fields: ['dataToken']
-          }
-        }
-      }
-      setQueryAndDids([queryHighest, results])
+  /* useEffect(() => {
+    getQueryHighest(chainIds).then((results) => {
+      setQueryAndDids(results)
     })
-  }, [config.subgraphUri, loading, web3Loading, web3Provider])
+  }, [chainIds]) */
 
   return (
     <Permission eventType="browse">
       <>
         <Container narrow className={styles.searchWrap}>
-          <SearchBar size="large" homeSearchButtonsArr={homeSearchButtons} />
+          <SearchBar homeSearchButtonsArr={homeSearchButtons} />
         </Container>
         <div className={styles.homeSearchButtonDiv}>
           <Button
@@ -181,7 +201,7 @@ export default function HomePage(): ReactElement {
         </div>
         <SectionQueryResult
           title="Recently Published"
-          query={queryLatest}
+          query={getQueryLatest(chainIds)}
           action={
             <Button style="text" to="/search?sort=created&sortOrder=desc">
               All data sets and algorithms →
