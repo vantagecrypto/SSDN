@@ -40,9 +40,7 @@ export default function Menu(): ReactElement {
     <nav className={styles.menu}>
       <Link to="/" className={styles.logo}>
         <Logo noWordmark />
-        <h1 className={styles.title}>
-          {siteTitleNew} <Badge label="v3" />
-        </h1>
+        <h1 className={styles.title}>{siteTitleNew}</h1>
       </Link>
 
       <ul className={styles.navigation}>
@@ -54,7 +52,6 @@ export default function Menu(): ReactElement {
       </ul>
 
       <div className={styles.actions}>
-        <SearchBar />
         <Networks />
         <Wallet />
         <UserPreferences />

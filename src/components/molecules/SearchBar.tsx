@@ -28,12 +28,10 @@ async function emptySearch() {
 
 export default function SearchBar({
   placeholder,
-  homeSearchButtonsArr,
   initialValue
 }: {
   placeholder?: string
   initialValue?: string
-  homeSearchButtonsArr?: string[]
 }): ReactElement {
   const [value, setValue] = useState(initialValue || '')
   const parsed = queryString.parse(location.search)
@@ -45,34 +43,16 @@ export default function SearchBar({
 
   async function startSearch(e: FormEvent<HTMLButtonElement>) {
     e.preventDefault()
-    let addToSearch = ''
-    const searchWords: { [k: string]: string } = {
-      va: 'VantageCrypto',
-      me: 'Metrics',
-      si: 'trading signals'
-    }
-    if (homeSearchButtonsArr && homeSearchButtonsArr.length > 0) {
-      const words = homeSearchButtonsArr.map(function (st) {
-        return searchWords[st]
-      })
-      addToSearch = words.join(' ')
-    }
+
     if (value === '') setValue(' ')
-    if (addToSearch !== '') {
-      if (value === ' ') {
-        setValue(addToSearch)
-      } else {
-        setValue(value + ' ' + addToSearch)
-      }
-    }
-    console.log(value, addToSearch)
+
     const urlEncodedValue = encodeURIComponent(value)
     const url = await addExistingParamsToUrl(location, [
       'text',
       'owner',
       'tags'
     ])
-    //navigate(`${url}&text=${urlEncodedValue}`)
+    navigate(`${url}&text=${urlEncodedValue}`)
   }
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {

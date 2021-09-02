@@ -1,12 +1,9 @@
 import React, { ReactElement, useEffect, useState } from 'react'
-import SearchBar from '../molecules/SearchBar'
 import AssetList from '../organisms/AssetList'
 import {
   QueryResult,
   SearchQuery
 } from '@oceanprotocol/lib/dist/node/metadatacache/MetadataCache'
-import Container from '../atoms/Container'
-import { useOcean } from '../../providers/Ocean'
 import Button from '../atoms/Button'
 import Bookmarks from '../molecules/Bookmarks'
 import axios from 'axios'
@@ -19,9 +16,10 @@ import { getHighestLiquidityDIDs } from '../../utils/subgraph'
 import { DDO, Logger } from '@oceanprotocol/lib'
 import { useSiteMetadata } from '../../hooks/useSiteMetadata'
 import { useUserPreferences } from '../../providers/UserPreferences'
+import Container from '../atoms/Container'
+import SearchBarOld from '../molecules/SearchBarOld'
 import styles from './Home.module.css'
 import classNames from 'classnames/bind'
-
 const cx = classNames.bind(styles)
 
 async function getQueryHighest(
@@ -134,9 +132,7 @@ function SectionQueryResult({
   )
 }
 
-export default function HomePage(): ReactElement {
-  const [queryAndDids, setQueryAndDids] = useState<[SearchQuery, string]>()
-  const { chainIds } = useUserPreferences()
+function SectionSearchButtons({ tt }: { tt?: string }) {
   const [homeSearchButtons, setHomeSearchButtons] = useState<string[]>([])
   const selectHomeSearchButtonStyleVa = cx({
     [styles.homeSearchButton]: true,
@@ -161,44 +157,55 @@ export default function HomePage(): ReactElement {
       setHomeSearchButtons((prev) => [...prev, val])
     }
   }
-  /* useEffect(() => {
+  return (
+    <div>
+      <Container narrow className={styles.searchWrap}>
+        <SearchBarOld homeSearchButtonsArr={homeSearchButtons} />
+      </Container>
+      <div className={styles.homeSearchButtonDiv}>
+        <Button
+          className={selectHomeSearchButtonStyleVa}
+          onClick={() => {
+            selectHomeSearchButton('va')
+          }}
+        >
+          VantageCrypto
+        </Button>
+        <Button
+          className={selectHomeSearchButtonStyleMe}
+          onClick={() => {
+            selectHomeSearchButton('me')
+          }}
+        >
+          Metrics
+        </Button>
+        <Button
+          className={selectHomeSearchButtonStyleSi}
+          onClick={() => {
+            selectHomeSearchButton('si')
+          }}
+        >
+          Signals
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+export default function HomePage(): ReactElement {
+  const [queryAndDids, setQueryAndDids] = useState<[SearchQuery, string]>()
+  const { chainIds } = useUserPreferences()
+
+  useEffect(() => {
     getQueryHighest(chainIds).then((results) => {
       setQueryAndDids(results)
     })
-  }, [chainIds]) */
+  }, [chainIds])
 
   return (
     <Permission eventType="browse">
       <>
-        <Container narrow className={styles.searchWrap}>
-          <SearchBar homeSearchButtonsArr={homeSearchButtons} />
-        </Container>
-        <div className={styles.homeSearchButtonDiv}>
-          <Button
-            className={selectHomeSearchButtonStyleVa}
-            onClick={() => {
-              selectHomeSearchButton('va')
-            }}
-          >
-            VantageCrypto
-          </Button>
-          <Button
-            className={selectHomeSearchButtonStyleMe}
-            onClick={() => {
-              selectHomeSearchButton('me')
-            }}
-          >
-            Metrics
-          </Button>
-          <Button
-            className={selectHomeSearchButtonStyleSi}
-            onClick={() => {
-              selectHomeSearchButton('si')
-            }}
-          >
-            Signals
-          </Button>
-        </div>
+        <SectionSearchButtons />
         <SectionQueryResult
           title="Recently Published"
           query={getQueryLatest(chainIds)}

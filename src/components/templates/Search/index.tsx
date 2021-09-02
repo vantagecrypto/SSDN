@@ -11,6 +11,7 @@ import { navigate } from 'gatsby'
 import { updateQueryStringParameter } from '../../../utils'
 import { useSiteMetadata } from '../../../hooks/useSiteMetadata'
 import { useUserPreferences } from '../../../providers/UserPreferences'
+import SearchBarOld from '../../molecules/SearchBarOld'
 
 export default function SearchPage({
   location,
@@ -71,6 +72,9 @@ export default function SearchPage({
     <Permission eventType="browse">
       <>
         <div className={styles.search}>
+          {(text || owner || tags) && (
+            <SearchBarOld initialValue={(text || owner) as string} />
+          )}
           <div className={styles.row}>
             <ServiceFilter
               serviceType={service}
