@@ -5,7 +5,7 @@ import Container from '../atoms/Container'
 
 export interface PageProps {
   children: ReactNode
-  title: string
+  title?: string
   titleNew?: string
   uri: string
   description?: string

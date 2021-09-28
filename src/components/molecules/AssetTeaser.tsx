@@ -2,22 +2,24 @@ import React from 'react'
 import { Link } from 'gatsby'
 import Dotdotdot from 'react-dotdotdot'
 import Price from '../atoms/Price'
-import { DDO, BestPrice } from '@oceanprotocol/lib'
+import { DDO } from '@oceanprotocol/lib'
 import removeMarkdown from 'remove-markdown'
 import Publisher from '../atoms/Publisher'
 import AssetType from '../atoms/AssetType'
 import NetworkName from '../atoms/NetworkName'
-import { useOcean } from '../../providers/Ocean'
 import styles from './AssetTeaser.module.css'
+import { BestPrice } from '../../models/BestPrice'
 
 declare type AssetTeaserProps = {
   ddo: DDO
   price: BestPrice
+  noPublisher?: boolean
 }
 
 const AssetTeaser: React.FC<AssetTeaserProps> = ({
   ddo,
-  price
+  price,
+  noPublisher
 }: AssetTeaserProps) => {
   const { attributes } = ddo.findServiceByType('metadata')
   const { name, type } = attributes.main
@@ -34,7 +36,9 @@ const AssetTeaser: React.FC<AssetTeaserProps> = ({
           <Dotdotdot clamp={3}>
             <h1 className={styles.title}>{name}</h1>
           </Dotdotdot>
-          <Publisher account={owner} minimal className={styles.publisher} />
+          {!noPublisher && (
+            <Publisher account={owner} minimal className={styles.publisher} />
+          )}
         </header>
 
         <AssetType

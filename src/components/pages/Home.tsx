@@ -1,12 +1,8 @@
 import React, { ReactElement, useEffect, useState } from 'react'
 import AssetList from '../organisms/AssetList'
-import {
-  QueryResult,
-  SearchQuery
-} from '@oceanprotocol/lib/dist/node/metadatacache/MetadataCache'
+import { SearchQuery } from '@oceanprotocol/lib/dist/node/metadatacache/MetadataCache'
 import Button from '../atoms/Button'
 import Bookmarks from '../molecules/Bookmarks'
-import axios from 'axios'
 import {
   queryMetadata,
   transformChainIdsListToQuery
@@ -20,6 +16,8 @@ import Container from '../atoms/Container'
 import SearchBarOld from '../molecules/SearchBarOld'
 import styles from './Home.module.css'
 import classNames from 'classnames/bind'
+import { useIsMounted } from '../../hooks/useIsMounted'
+import { useCancelToken } from '../../hooks/useCancelToken'
 const cx = classNames.bind(styles)
 
 async function getQueryHighest(
@@ -27,8 +25,7 @@ async function getQueryHighest(
 ): Promise<[SearchQuery, string]> {
   const [dids, didsLength] = await getHighestLiquidityDIDs(chainIds)
   const queryHighest = {
-    page: 1,
-    offset: didsLength > 0 ? didsLength : 1,
+    size: didsLength > 0 ? didsLength : 1,
     query: {
       query_string: {
         query: `${dids && `(${dids}) AND`}(${transformChainIdsListToQuery(
@@ -42,10 +39,9 @@ async function getQueryHighest(
   return [queryHighest, dids]
 }
 
-function getQueryLatest(chainIds: number[]): SearchQuery {
+function getQueryLatest(chainIds: number[]): any {
   return {
-    page: 1,
-    offset: 9,
+    size: 9,
     query: {
       query_string: {
         query: `(${transformChainIdsListToQuery(
@@ -53,7 +49,7 @@ function getQueryLatest(chainIds: number[]): SearchQuery {
         )}) AND -isInPurgatory:true `
       }
     },
-    sort: { created: -1 }
+    sort: { created: 'desc' }
   }
 }
 
@@ -77,16 +73,16 @@ function SectionQueryResult({
 }) {
   const { appConfig } = useSiteMetadata()
   const { chainIds } = useUserPreferences()
-  const [result, setResult] = useState<QueryResult>()
+  const [result, setResult] = useState<any>()
   const [loading, setLoading] = useState<boolean>()
-
+  const isMounted = useIsMounted()
+  const newCancelToken = useCancelToken()
   useEffect(() => {
     if (!appConfig.metadataCacheUri) return
-    const source = axios.CancelToken.source()
 
     async function init() {
       if (chainIds.length === 0) {
-        const result: QueryResult = {
+        const result: any = {
           results: [],
           page: 0,
           totalPages: 0,
@@ -97,8 +93,9 @@ function SectionQueryResult({
       } else {
         try {
           setLoading(true)
-          const result = await queryMetadata(query, source.token)
-          if (queryData && result.totalResults > 0) {
+          const result = await queryMetadata(query, newCancelToken())
+          if (!isMounted()) return
+          if (queryData && result?.totalResults > 0) {
             const searchDIDs = queryData.split(' ')
             const sortedAssets = sortElements(result.results, searchDIDs)
             const overflow = sortedAssets.length - 9
@@ -113,11 +110,14 @@ function SectionQueryResult({
       }
     }
     init()
-
-    return () => {
-      source.cancel()
-    }
-  }, [appConfig.metadataCacheUri, query, queryData])
+  }, [
+    appConfig.metadataCacheUri,
+    chainIds.length,
+    isMounted,
+    newCancelToken,
+    query,
+    queryData
+  ])
 
   return (
     <section className={styles.section}>
